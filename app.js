@@ -95,15 +95,40 @@ function render(){
  }).join("");
  renderRows(ranked,m);
 }
+function normalizeSearch(raw){
+  let q=raw.trim().toLowerCase().replace(/\s/g,"");
+  if(!q) return "";
+
+  // 쉼표는 무시하고, 0/x/-/·/_ 는 모두 빈칸으로 취급
+  q=q.replace(/,/g,"");
+  q=q.replace(/[x\-·_]/g,"0");
+
+  return q;
+}
+
+function layoutSearchKey(layout){
+  return layout.map(v=>v||0).join("");
+}
+
 function renderRows(ranked,m){
- const q=document.querySelector("#search").value.trim().replace(/\s/g,"");
- let filtered=ranked.map((r,i)=>({r,i})).filter(({r})=>!q||r.layout.map(x=>x||"-").join(",").includes(q));
+ const q=normalizeSearch(document.querySelector("#search").value);
+ let filtered=ranked.map((r,i)=>({r,i})).filter(({r})=>{
+   if(!q) return true;
+   const key=layoutSearchKey(r.layout);
+
+   // 10230, 1x23x 같은 5자리 입력은 배치 전체와 정확히 비교
+   if(/^[0-3]{5}$/.test(q)) return key===q;
+
+   // 짧은 입력은 부분 검색도 허용
+   return key.includes(q);
+ });
  document.querySelector("#rows").innerHTML=filtered.map(({r,i})=>`<tr>
  <td>${i+1}</td><td>${tierOf(i)}</td><td>${r.layout.map(x=>x||"–").join(" · ")}</td>
  <td>${r.expectedReward.toFixed(4)}</td><td>${r.expectedScore.toFixed(4)}</td>
  <td>${fmtPct(r.p20)}</td><td>${fmtPct(r.p16)}</td><td>${fmtPct(r.p13)}</td>
  <td><button class="detailbtn" onclick="showDetail(${r.id})">보기</button></td></tr>`).join("");
 }
+
 function showDetail(id){
  const r=results[id], keys=["0","1-6","7-9","10-12","13-15","16-19","20+"];
  document.querySelector("#detailContent").innerHTML=`<div class="eyebrow">Layout detail</div><h2>배치 상세 분석</h2>${layoutHTML(r.layout)}
