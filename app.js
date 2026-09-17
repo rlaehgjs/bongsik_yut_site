@@ -63,7 +63,16 @@ function metricLabel(m){return {
   p3only:"3등만 (13~15점) 확률",
   expectedScore:"평균점수"
 }[m]}
-function metricValue(r,m){return m.startsWith("p")?fmtPct(r[m]):r[m].toFixed(4)}
+function getMetric(r,m){
+  if(m==="p2only") return r.p2only ?? r.probs?.["16-19"] ?? 0;
+  if(m==="p3only") return r.p3only ?? r.probs?.["13-15"] ?? 0;
+  return r[m];
+}
+function metricValue(r,m){
+  const v=getMetric(r,m);
+  if(v===undefined || Number.isNaN(v)) return "계산 오류";
+  return m.startsWith("p") ? fmtPct(v) : Number(v).toFixed(4);
+}
 function tierOf(i){return i<6?"S":i<18?"A":i<36?"B":"C"}
 function layoutHTML(x){return `<div class="layout">${x.map((v,i)=>`<div class="cell ${v?'piece'+v:''}" title="${i+1}번 칸">${v||"·"}</div>`).join("")}</div>`}
 function card(r,i,m){
@@ -72,7 +81,7 @@ function card(r,i,m){
 }
 function render(){
  const m=document.querySelector("#metric").value;
- let ranked=[...results].sort((a,b)=>b[m]-a[m]); ranked.forEach((r,i)=>r.id=results.indexOf(r));
+ let ranked=[...results].sort((a,b)=>getMetric(b,m)-getMetric(a,m)); ranked.forEach((r,i)=>r.id=results.indexOf(r));
  const best=ranked[0];
  document.querySelector("#summary").innerHTML=`
  <div class="stat"><span>최적 기준</span><b>${metricLabel(m)}</b></div>
