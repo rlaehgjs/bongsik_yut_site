@@ -43,11 +43,26 @@ function analyze(layout){
   for(const [s,p] of d){expectedScore+=s*p;probs[bucket(s)]+=p}
   let expectedReward=Object.keys(probs).reduce((z,k)=>z+probs[k]*VALUES[k],0);
   const at=t=>[...d].reduce((z,[s,p])=>z+(s>=t?p:0),0);
-  return {layout,d,probs,expectedScore,expectedReward,p20:at(20),p16:at(16),p13:at(13)};
+  return {
+    layout,d,probs,expectedScore,expectedReward,
+    p20:at(20),
+    p16:at(16),
+    p2only:probs["16-19"],
+    p13:at(13),
+    p3only:probs["13-15"]
+  };
 }
 function calculate(){results=permutations().map(analyze);render()}
 function fmtPct(x){return (x*100).toFixed(4)+"%"}
-function metricLabel(m){return {expectedReward:"상품가치 EV",p20:"20점+ 확률",p16:"16점+ 확률",p13:"13점+ 확률",expectedScore:"평균점수"}[m]}
+function metricLabel(m){return {
+  expectedReward:"상품가치 EV",
+  p20:"1등 (20점+) 확률",
+  p16:"2등 이상 (16점+) 확률",
+  p2only:"2등만 (16~19점) 확률",
+  p13:"3등 이상 (13점+) 확률",
+  p3only:"3등만 (13~15점) 확률",
+  expectedScore:"평균점수"
+}[m]}
 function metricValue(r,m){return m.startsWith("p")?fmtPct(r[m]):r[m].toFixed(4)}
 function tierOf(i){return i<6?"S":i<18?"A":i<36?"B":"C"}
 function layoutHTML(x){return `<div class="layout">${x.map((v,i)=>`<div class="cell ${v?'piece'+v:''}" title="${i+1}번 칸">${v||"·"}</div>`).join("")}</div>`}
