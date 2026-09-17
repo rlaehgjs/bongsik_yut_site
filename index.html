@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>봉식이 생존 윷놀이 배치 분석기</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div>
+    <div class="eyebrow">봉식이 이벤트 분석</div>
+    <h1>생존 윷놀이 배치 티어표</h1>
+    <p>3점·2점·1점 말을 5칸에 배치하는 60가지 경우를 정확 확률로 계산합니다.</p>
+  </div>
+  <div class="rule">출발 → 1 → 2 → 3 → 4 → 5 → 반환점 → 5 → 4 → 3 → 2 → 1 → 출발</div>
+</header>
+
+<main>
+  <section class="controls panel">
+    <div>
+      <label for="metric">정렬 / 티어 기준</label>
+      <select id="metric">
+        <option value="expectedReward">상품 가치 기대값</option>
+        <option value="p20">20점 이상 확률</option>
+        <option value="p16">16점 이상 확률</option>
+        <option value="p13">13점 이상 확률</option>
+        <option value="expectedScore">평균 최종점수</option>
+      </select>
+    </div>
+    <div class="values">
+      <span>가치</span>
+      <label>0 <input data-tier="0" type="number" value="1"></label>
+      <label>1~6 <input data-tier="1-6" type="number" value="2"></label>
+      <label>7~9 <input data-tier="7-9" type="number" value="8"></label>
+      <label>10~12 <input data-tier="10-12" type="number" value="15"></label>
+      <label>13~15 <input data-tier="13-15" type="number" value="100"></label>
+      <label>16~19 <input data-tier="16-19" type="number" value="800"></label>
+      <label>20+ <input data-tier="20+" type="number" value="5000"></label>
+      <button id="recalc">가치 재계산</button>
+    </div>
+  </section>
+
+  <section id="summary" class="summary"></section>
+
+  <section class="panel">
+    <div class="sectionhead">
+      <div><div class="eyebrow">Tier list</div><h2>배치 티어</h2></div>
+      <p>S 상위 10% · A 다음 20% · B 다음 30% · C 나머지</p>
+    </div>
+    <div id="tiers"></div>
+  </section>
+
+  <section class="panel">
+    <div class="sectionhead">
+      <div><div class="eyebrow">All layouts</div><h2>전체 60가지</h2></div>
+      <input id="search" placeholder="예: 3,-,1,2,-">
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr>
+          <th>순위</th><th>티어</th><th>배치 (1→5)</th><th>상품가치 EV</th>
+          <th>평균점수</th><th>20+</th><th>16+</th><th>13+</th><th>상세</th>
+        </tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<dialog id="detail">
+  <button class="close" onclick="detail.close()">×</button>
+  <div id="detailContent"></div>
+</dialog>
+
+<footer>확률은 몬테카를로가 아니라 모든 윷 결과 분기를 합산하여 계산합니다.</footer>
+<script src="app.js"></script>
+</body>
+</html>
